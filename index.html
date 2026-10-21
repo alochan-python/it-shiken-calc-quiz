@@ -14,6 +14,7 @@
   --accent:#0E7C86; --accent-strong:#0A5E66; --accent-soft:#E1F1F1; --accent-contrast:#FFFFFF;
   --cat-tech:#2F5FD6; --cat-tech-soft:#E7ECFC;
   --cat-strat:#1E8F72; --cat-strat-soft:#E4F5F0;
+  --cat-mgmt:#7A4FC9; --cat-mgmt-soft:#F0EBFB;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -22,6 +23,7 @@
     --accent:#3FBEC2; --accent-strong:#5FD1D4; --accent-soft:rgba(63,190,194,.14); --accent-contrast:#08262A;
     --cat-tech:#7C9DF5; --cat-tech-soft:rgba(124,157,245,.14);
     --cat-strat:#5FC9A8; --cat-strat-soft:rgba(95,201,168,.14);
+    --cat-mgmt:#B79AEF; --cat-mgmt-soft:rgba(183,154,239,.14);
   }
 }
 *{box-sizing:border-box}
@@ -39,6 +41,7 @@ header p{color:var(--text-faint);font-size:.85rem;margin:0}
 .card .badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.68rem;font-weight:700;margin-bottom:10px}
 .card.ap .badge{background:var(--cat-tech-soft);color:var(--cat-tech)}
 .card.st .badge{background:var(--cat-strat-soft);color:var(--cat-strat)}
+.card.stall .badge{background:var(--cat-mgmt-soft);color:var(--cat-mgmt)}
 .card h2{font-size:1.15rem;margin:0 0 6px;font-weight:700}
 .card p{color:var(--text-dim);font-size:.85rem;margin:0 0 10px}
 .card .cta{color:var(--accent);font-weight:700;font-size:.82rem}
@@ -63,6 +66,13 @@ footer{margin-top:30px;color:var(--text-faint);font-size:.72rem;text-align:cente
     <span class="badge">ストラテジ系</span>
     <h2>ST計算問題道場</h2>
     <p>ITストラテジスト試験・午前II 計算問題 19問(過去9回分)</p>
+    <span class="cta">開く →</span>
+  </a>
+
+  <a class="card stall" href="st-all/">
+    <span class="badge">全分野</span>
+    <h2>ST全問題道場</h2>
+    <p>ITストラテジスト試験・午前II 全225問(過去9回分・解説つき)</p>
     <span class="cta">開く →</span>
   </a>
 
