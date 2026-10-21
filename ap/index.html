@@ -124,7 +124,7 @@ button{font-family:inherit; touch-action:manipulation; color:inherit; background
 .mode-card .mc-title{font-size:.86rem;font-weight:700;margin-top:2px}
 .mode-card .mc-desc{font-size:.72rem;color:var(--text-faint);margin-top:2px}
 .mode-card.retry .mc-count{color:var(--danger)}
-.mode-card.unsure .mc-count{color:var(--warning)}
+.mode-card.checked .mc-count{color:var(--warning)}
 .mode-card.fresh .mc-count{color:var(--text-dim)}
 
 .filters{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-m);padding:14px;box-shadow:var(--shadow)}
@@ -137,6 +137,12 @@ button{font-family:inherit; touch-action:manipulation; color:inherit; background
   border-radius:999px;padding:5px 12px;font-size:.76rem;cursor:pointer;white-space:nowrap;
 }
 .chip.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast);font-weight:700}
+.chip.chip-green{border-color:var(--success);color:var(--success)}
+.chip.chip-green.active{background:var(--success);border-color:var(--success);color:#fff}
+.chip.chip-yellow{border-color:var(--warning);color:var(--warning)}
+.chip.chip-yellow.active{background:var(--warning);border-color:var(--warning);color:#fff}
+.chip.chip-red{border-color:var(--danger);color:var(--danger)}
+.chip.chip-red.active{background:var(--danger);border-color:var(--danger);color:#fff}
 
 .start-cta{
   width:100%;margin-top:14px;background:var(--accent);color:var(--accent-contrast);border:none;
@@ -162,7 +168,9 @@ button{font-family:inherit; touch-action:manipulation; color:inherit; background
 .badge.cat-mgmt{background:var(--cat-mgmt-soft);color:var(--cat-mgmt)}
 .badge.cat-strat{background:var(--cat-strat-soft);color:var(--cat-strat)}
 .badge.meta{background:var(--surface-2);color:var(--text-dim);font-weight:500}
-.badge.unsure-flag{background:var(--warning-soft);color:var(--warning)}
+.badge.check-green{background:var(--success-soft);color:var(--success)}
+.badge.check-yellow{background:var(--warning-soft);color:var(--warning)}
+.badge.check-red{background:var(--danger-soft);color:var(--danger)}
 
 .qtext{font-size:.94rem;line-height:1.6}
 .qtext img{max-width:100%;height:auto;display:block;margin:1em auto}
@@ -299,12 +307,17 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
 .linkrow a{text-decoration:none;color:var(--text-dim);border-bottom:1px solid var(--border)}
 .linkrow a:hover{color:var(--accent);border-color:var(--accent)}
 
-.footer-actions{display:flex;align-items:center;gap:10px;margin-top:4px}
-.unsure-toggle{
-  display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);background:var(--bg-elevated);
-  border-radius:999px;padding:9px 14px;font-size:.8rem;cursor:pointer;color:var(--text-dim);flex-shrink:0;
+.footer-actions{display:flex;align-items:center;gap:8px;margin-top:4px}
+.check-row{display:flex;gap:6px;flex-shrink:0}
+.check-dot{
+  width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg-elevated);
+  font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:.45;filter:grayscale(.6);
 }
-.unsure-toggle.on{border-color:var(--warning);background:var(--warning-soft);color:var(--warning);font-weight:700}
+.check-dot.active{opacity:1;filter:none;transform:scale(1.08);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.check-dot.green.active{border-color:var(--success)}
+.check-dot.yellow.active{border-color:var(--warning)}
+.check-dot.red.active{border-color:var(--danger)}
 .next-btn{
   flex:1;background:var(--accent);color:var(--accent-contrast);border:none;border-radius:999px;
   padding:12px;font-size:.9rem;font-weight:700;cursor:pointer;
@@ -325,7 +338,9 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
 .jump-cell.current{outline:2px solid var(--accent);outline-offset:1px}
 .jump-cell.correct{background:var(--success-soft);color:var(--success);border-color:transparent}
 .jump-cell.wrong{background:var(--danger-soft);color:var(--danger);border-color:transparent}
-.jump-cell.unsure{box-shadow:inset 0 -3px 0 var(--warning)}
+.jump-cell.check-green{box-shadow:inset 0 -3px 0 var(--success)}
+.jump-cell.check-yellow{box-shadow:inset 0 -3px 0 var(--warning)}
+.jump-cell.check-red{box-shadow:inset 0 -3px 0 var(--danger)}
 
 /* done screen */
 .done-wrap{text-align:center;padding:40px 10px}
@@ -404,7 +419,7 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
         <div class="stat-row"><span class="lbl">全問題</span><b class="num">209</b></div>
         <div class="stat-row"><span class="lbl">正解</span><b class="num" id="statCorrect">0</b></div>
         <div class="stat-row"><span class="lbl">不正解</span><b class="num" id="statWrong">0</b></div>
-        <div class="stat-row"><span class="lbl">あやふや</span><b class="num" id="statUnsure">0</b></div>
+        <div class="stat-row"><span class="lbl">チェック済み</span><b class="num" id="statChecked">0</b></div>
         <div class="stat-row"><span class="lbl">未回答</span><b class="num" id="statFresh">209</b></div>
       </div>
     </div>
@@ -421,10 +436,10 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
         <div class="mc-title">間違えた問題</div>
         <div class="mc-desc">解き直しで定着</div>
       </button>
-      <button class="mode-card unsure" data-mode="unsure" id="cardUnsure" disabled>
-        <div class="mc-count num" id="mcUnsure">0</div>
-        <div class="mc-title">あやふやな問題</div>
-        <div class="mc-desc">チェック済みのみ</div>
+      <button class="mode-card checked" data-mode="checked" id="cardChecked" disabled>
+        <div class="mc-count num" id="mcChecked">0</div>
+        <div class="mc-title">チェック済み</div>
+        <div class="mc-desc">🟢🟡🔴どれかチェックした問題</div>
       </button>
       <button class="mode-card" data-mode="fresh" id="cardFresh">
         <div class="mc-count num" id="mcFresh">209</div>
@@ -450,6 +465,10 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
 
     <div class="section-label">絞り込み（任意）</div>
     <div class="filters">
+      <div class="filter-group">
+        <div class="fg-label">チェック</div>
+        <div class="chip-row" id="checkChips"></div>
+      </div>
       <div class="filter-group">
         <div class="fg-label">系統</div>
         <div class="chip-row" id="catChips"></div>
@@ -519,7 +538,11 @@ span.code{background:var(--surface-2);border-radius:5px;padding:1px 6px;border:1
       </div>
 
       <div class="footer-actions">
-        <button class="unsure-toggle" id="unsureBtn">☆ あやふや</button>
+        <div class="check-row" id="checkRow">
+          <button class="check-dot green" data-check="green" title="わかる・自信あり">🟢</button>
+          <button class="check-dot yellow" data-check="yellow" title="あやふや">🟡</button>
+          <button class="check-dot red" data-check="red" title="わからない・要復習">🔴</button>
+        </div>
         <button class="next-btn" id="nextBtn" disabled>回答して確認</button>
       </div>
       <div class="quiz-nav">
@@ -564,15 +587,26 @@ var state = loadState();
 function loadState(){
   try{
     var raw = localStorage.getItem(STORE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      var s = JSON.parse(raw);
+      if(!s.checks) s.checks = {};
+      if(s.unsure){
+        Object.keys(s.unsure).forEach(function(id){
+          if(s.unsure[id] && !s.checks[id]) s.checks[id] = 'yellow';
+        });
+        delete s.unsure;
+      }
+      if(!s.answers) s.answers = {};
+      return s;
+    }
   }catch(e){}
-  return {answers:{}, unsure:{}};
+  return {answers:{}, checks:{}};
 }
 function saveState(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
 }
 
-var filter = {cats:new Set(), fields:new Set(), years:new Set()};
+var filter = {cats:new Set(), fields:new Set(), years:new Set(), checks:new Set()};
 var queue = [];      // array of question ids for current session
 var qPos = 0;        // index into queue
 var answeredThisQ = false;
@@ -751,16 +785,17 @@ function flashBigStamp(correct){
 
 // ---------- stats ----------
 function computeStats(){
-  var answered=0, correct=0, wrong=0, unsure=0;
+  var answered=0, correct=0, wrong=0, checked=0;
   QUESTIONS.forEach(function(q){
     var a = state.answers[q.id];
     if(a){ answered++; if(a.correct) correct++; else wrong++; }
-    if(state.unsure[q.id]) unsure++;
+    if(state.checks[q.id]) checked++;
   });
-  return {answered:answered, correct:correct, wrong:wrong, unsure:unsure, fresh:QUESTIONS.length-answered};
+  return {answered:answered, correct:correct, wrong:wrong, checked:checked, fresh:QUESTIONS.length-answered};
 }
 function idsWrong(){ return QUESTIONS.filter(function(q){var a=state.answers[q.id]; return a && !a.correct}).map(function(q){return q.id}); }
-function idsUnsure(){ return QUESTIONS.filter(function(q){return !!state.unsure[q.id]}).map(function(q){return q.id}); }
+function idsChecked(){ return QUESTIONS.filter(function(q){return !!state.checks[q.id]}).map(function(q){return q.id}); }
+function idsByCheck(color){ return QUESTIONS.filter(function(q){return state.checks[q.id]===color}).map(function(q){return q.id}); }
 function idsFresh(){ return QUESTIONS.filter(function(q){return !state.answers[q.id]}).map(function(q){return q.id}); }
 
 function renderDash(){
@@ -768,7 +803,7 @@ function renderDash(){
   document.getElementById('statAnswered').textContent = s.answered;
   document.getElementById('statCorrect').textContent = s.correct;
   document.getElementById('statWrong').textContent = s.wrong;
-  document.getElementById('statUnsure').textContent = s.unsure;
+  document.getElementById('statChecked').textContent = s.checked;
   document.getElementById('statFresh').textContent = s.fresh;
   var pct = s.answered ? Math.round(s.correct/s.answered*100) : null;
   document.getElementById('pctText').textContent = pct===null ? '–' : pct+'%';
@@ -778,25 +813,51 @@ function renderDash(){
   ring.style.strokeDashoffset = (circumference - (pct||0)/100*circumference).toFixed(1);
 
   document.getElementById('mcAll').textContent = QUESTIONS.length;
-  var w = idsWrong().length, u = idsUnsure().length, f = idsFresh().length;
+  var w = idsWrong().length, c = idsChecked().length, f = idsFresh().length;
   document.getElementById('mcWrong').textContent = w;
-  document.getElementById('mcUnsure').textContent = u;
+  document.getElementById('mcChecked').textContent = c;
   document.getElementById('mcFresh').textContent = f;
   document.getElementById('cardWrong').disabled = w===0;
-  document.getElementById('cardUnsure').disabled = u===0;
+  document.getElementById('cardChecked').disabled = c===0;
   document.getElementById('cardFresh').disabled = f===0;
 
   renderFilterCount();
 }
 
-function chip(label, active, onclick){
+function chip(label, active, onclick, extraClass){
   var b = document.createElement('button');
-  b.className = 'chip'+(active?' active':'');
+  b.className = 'chip'+(extraClass?' '+extraClass:'')+(active?' active':'');
   b.textContent = label;
   b.addEventListener('click', onclick);
   return b;
 }
+var CHECK_DEFS = [
+  {key:'green', label:'🟢 わかる', cls:'chip-green'},
+  {key:'yellow', label:'🟡 あやふや', cls:'chip-yellow'},
+  {key:'red', label:'🔴 わからない', cls:'chip-red'}
+];
+function renderCheckBadge(id){
+  var badges = document.getElementById('qBadges');
+  var existing = badges.querySelector('[data-check-badge]');
+  if(existing) existing.remove();
+  var color = state.checks[id];
+  if(color){
+    var cDef = CHECK_DEFS.filter(function(d){return d.key===color})[0];
+    var b = document.createElement('span');
+    b.className = 'badge check-'+color;
+    b.setAttribute('data-check-badge', '1');
+    b.textContent = cDef ? cDef.label : color;
+    badges.appendChild(b);
+  }
+}
 function renderChips(){
+  var checkWrap = document.getElementById('checkChips'); checkWrap.innerHTML='';
+  CHECK_DEFS.forEach(function(cd){
+    checkWrap.appendChild(chip(cd.label, filter.checks.has(cd.key), function(){
+      if(filter.checks.has(cd.key)) filter.checks.delete(cd.key); else filter.checks.add(cd.key);
+      renderChips(); renderFilterCount();
+    }, cd.cls));
+  });
   var catWrap = document.getElementById('catChips'); catWrap.innerHTML='';
   CATS.forEach(function(c){
     catWrap.appendChild(chip(c, filter.cats.has(c), function(){
@@ -825,14 +886,17 @@ function filteredIds(baseIds){
     if(filter.cats.size && !filter.cats.has(q.cat)) return false;
     if(filter.fields.size && !filter.fields.has(q.field)) return false;
     if(filter.years.size && !filter.years.has(q.year)) return false;
+    if(filter.checks.size && !filter.checks.has(state.checks[id])) return false;
     return true;
   });
+}
+function hasActiveFilter(){
+  return filter.cats.size || filter.fields.size || filter.years.size || filter.checks.size;
 }
 function renderFilterCount(){
   var all = QUESTIONS.map(function(q){return q.id});
   var n = filteredIds(all).length;
-  document.getElementById('filterCount').textContent = (filter.cats.size||filter.fields.size||filter.years.size)
-    ? n+'問が条件に一致' : '';
+  document.getElementById('filterCount').textContent = hasActiveFilter() ? n+'問が条件に一致' : '';
   document.getElementById('startBtn').disabled = n===0;
 }
 
@@ -849,10 +913,10 @@ function startSession(mode){
   var all = QUESTIONS.map(function(q){return q.id});
   if(mode==='all') ids = all;
   else if(mode==='wrong') ids = idsWrong();
-  else if(mode==='unsure') ids = idsUnsure();
+  else if(mode==='checked') ids = idsChecked();
   else if(mode==='fresh') ids = idsFresh();
   else ids = filteredIds(all);
-  if(mode!=='filter' && (filter.cats.size||filter.fields.size||filter.years.size)) ids = filteredIds(ids);
+  if(mode!=='filter' && hasActiveFilter()) ids = filteredIds(ids);
   if(!ids.length) return;
   queue = ids;
   qPos = 0;
@@ -861,8 +925,8 @@ function startSession(mode){
 }
 
 document.getElementById('resetBtn').addEventListener('click', function(){
-  if(confirm('すべての回答履歴（正誤・あやふやチェック）を削除します。よろしいですか？')){
-    state = {answers:{}, unsure:{}};
+  if(confirm('すべての回答履歴（正誤・チェック）を削除します。よろしいですか？')){
+    state = {answers:{}, checks:{}};
     saveState();
     renderDash();
   }
@@ -894,12 +958,7 @@ function renderQuestion(){
   fieldB.className = 'badge meta';
   fieldB.textContent = cur.field;
   badges.appendChild(fieldB);
-  if(state.unsure[cur.id]){
-    var uB = document.createElement('span');
-    uB.className = 'badge unsure-flag';
-    uB.textContent = '★ あやふや';
-    badges.appendChild(uB);
-  }
+  renderCheckBadge(cur.id);
 
   document.getElementById('qText').innerHTML = cur.q;
 
@@ -909,9 +968,9 @@ function renderQuestion(){
   document.getElementById('nextBtn').textContent = '回答して確認';
   document.getElementById('nextBtn').disabled = true;
 
-  var unsureBtn = document.getElementById('unsureBtn');
-  unsureBtn.classList.toggle('on', !!state.unsure[cur.id]);
-  unsureBtn.textContent = state.unsure[cur.id] ? '★ あやふや' : '☆ あやふや';
+  document.querySelectorAll('.check-dot').forEach(function(d){
+    d.classList.toggle('active', d.getAttribute('data-check')===state.checks[cur.id]);
+  });
 
   document.getElementById('prevBtn').style.visibility = qPos>0 ? 'visible' : 'hidden';
 
@@ -1086,14 +1145,18 @@ document.getElementById('prevBtn').addEventListener('click', function(){
   clearAutoTimer();
   if(qPos>0){ qPos--; renderQuestion(); }
 });
-document.getElementById('unsureBtn').addEventListener('click', function(){
+document.getElementById('checkRow').addEventListener('click', function(e){
+  var btn = e.target.closest('.check-dot');
+  if(!btn) return;
   var cur = q();
-  state.unsure[cur.id] = !state.unsure[cur.id];
-  if(!state.unsure[cur.id]) delete state.unsure[cur.id];
+  var color = btn.getAttribute('data-check');
+  if(state.checks[cur.id] === color) delete state.checks[cur.id];
+  else state.checks[cur.id] = color;
   saveState();
-  var btn = document.getElementById('unsureBtn');
-  btn.classList.toggle('on', !!state.unsure[cur.id]);
-  btn.textContent = state.unsure[cur.id] ? '★ あやふや' : '☆ あやふや';
+  document.querySelectorAll('.check-dot').forEach(function(d){
+    d.classList.toggle('active', d.getAttribute('data-check')===state.checks[cur.id]);
+  });
+  renderCheckBadge(cur.id);
 });
 document.getElementById('quizHome').addEventListener('click', function(){ clearAutoTimer(); renderDash(); showView('dash'); });
 
@@ -1124,7 +1187,7 @@ function renderJump(){
     cell.className = 'jump-cell';
     if(i===qPos) cell.classList.add('current');
     if(a) cell.classList.add(a.correct ? 'correct' : 'wrong');
-    if(state.unsure[id]) cell.classList.add('unsure');
+    if(state.checks[id]) cell.classList.add('check-'+state.checks[id]);
     cell.textContent = i+1;
     cell.title = qq.period+' 問'+qq.num;
     cell.addEventListener('click', function(){ qPos = i; renderQuestion(); showView('quiz'); });
