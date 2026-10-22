@@ -597,10 +597,14 @@ function loadState(){
       // migrate from the old single-flag "あやふや" toggle, if present
       if(s.unsure){
         Object.keys(s.unsure).forEach(function(id){
-          if(s.unsure[id] && !s.checks[id]) s.checks[id] = 'yellow';
+          if(s.unsure[id] && !s.checks[id]) s.checks[id] = ['yellow'];
         });
         delete s.unsure;
       }
+      // migrate single-color checks (one value per question) to multi-select arrays
+      Object.keys(s.checks).forEach(function(id){
+        if(typeof s.checks[id] === 'string') s.checks[id] = [s.checks[id]];
+      });
       if(!s.answers) s.answers = {};
       return s;
     }
@@ -795,13 +799,14 @@ function computeStats(){
   QUESTIONS.forEach(function(q){
     var a = state.answers[q.id];
     if(a){ answered++; if(a.correct) correct++; else wrong++; }
-    if(state.checks[q.id]) checked++;
+    if(state.checks[q.id] && state.checks[q.id].length) checked++;
   });
   return {answered:answered, correct:correct, wrong:wrong, checked:checked, fresh:QUESTIONS.length-answered};
 }
 function idsWrong(){ return QUESTIONS.filter(function(q){var a=state.answers[q.id]; return a && !a.correct}).map(function(q){return q.id}); }
-function idsChecked(){ return QUESTIONS.filter(function(q){return !!state.checks[q.id]}).map(function(q){return q.id}); }
-function idsByCheck(color){ return QUESTIONS.filter(function(q){return state.checks[q.id]===color}).map(function(q){return q.id}); }
+function isChecked(id, color){ var c = state.checks[id]; return !!c && c.indexOf(color)>=0; }
+function idsChecked(){ return QUESTIONS.filter(function(q){var c=state.checks[q.id]; return c && c.length>0;}).map(function(q){return q.id}); }
+function idsByCheck(color){ return QUESTIONS.filter(function(q){return isChecked(q.id, color);}).map(function(q){return q.id}); }
 function idsFresh(){ return QUESTIONS.filter(function(q){return !state.answers[q.id]}).map(function(q){return q.id}); }
 
 function renderDash(){
@@ -845,17 +850,16 @@ var CHECK_DEFS = [
 ];
 function renderCheckBadge(id){
   var badges = document.getElementById('qBadges');
-  var existing = badges.querySelector('[data-check-badge]');
-  if(existing) existing.remove();
-  var color = state.checks[id];
-  if(color){
+  badges.querySelectorAll('[data-check-badge]').forEach(function(el){ el.remove(); });
+  var arr = state.checks[id] || [];
+  arr.forEach(function(color){
     var cDef = CHECK_DEFS.filter(function(d){return d.key===color})[0];
     var b = document.createElement('span');
     b.className = 'badge check-'+color;
     b.setAttribute('data-check-badge', '1');
     b.textContent = cDef ? cDef.label : color;
     badges.appendChild(b);
-  }
+  });
 }
 function renderChips(){
   var checkWrap = document.getElementById('checkChips'); checkWrap.innerHTML='';
@@ -893,7 +897,12 @@ function filteredIds(baseIds){
     if(filter.cats.size && !filter.cats.has(q.cat)) return false;
     if(filter.fields.size && !filter.fields.has(q.field)) return false;
     if(filter.years.size && !filter.years.has(q.year)) return false;
-    if(filter.checks.size && !filter.checks.has(state.checks[id])) return false;
+    if(filter.checks.size){
+      var qchecks = state.checks[id] || [];
+      var anyMatch = false;
+      filter.checks.forEach(function(c){ if(qchecks.indexOf(c)>=0) anyMatch = true; });
+      if(!anyMatch) return false;
+    }
     return true;
   });
 }
@@ -977,7 +986,7 @@ function renderQuestion(){
   document.getElementById('nextBtn').disabled = true;
 
   document.querySelectorAll('.check-dot').forEach(function(d){
-    d.classList.toggle('active', d.getAttribute('data-check')===state.checks[cur.id]);
+    d.classList.toggle('active', isChecked(cur.id, d.getAttribute('data-check')));
   });
 
   document.getElementById('prevBtn').style.visibility = qPos>0 ? 'visible' : 'hidden';
@@ -1168,11 +1177,13 @@ document.getElementById('checkRow').addEventListener('click', function(e){
   if(!btn) return;
   var cur = q();
   var color = btn.getAttribute('data-check');
-  if(state.checks[cur.id] === color) delete state.checks[cur.id];
-  else state.checks[cur.id] = color;
+  var arr = (state.checks[cur.id] || []).slice();
+  var idx = arr.indexOf(color);
+  if(idx>=0) arr.splice(idx,1); else arr.push(color);
+  if(arr.length) state.checks[cur.id] = arr; else delete state.checks[cur.id];
   saveState();
   document.querySelectorAll('.check-dot').forEach(function(d){
-    d.classList.toggle('active', d.getAttribute('data-check')===state.checks[cur.id]);
+    d.classList.toggle('active', isChecked(cur.id, d.getAttribute('data-check')));
   });
   renderCheckBadge(cur.id);
 });
@@ -1205,7 +1216,9 @@ function renderJump(){
     cell.className = 'jump-cell';
     if(i===qPos) cell.classList.add('current');
     if(a) cell.classList.add(a.correct ? 'correct' : 'wrong');
-    if(state.checks[id]) cell.classList.add('check-'+state.checks[id]);
+    var cellChecks = state.checks[id] || [];
+    var priorityColor = ['red','yellow','green'].filter(function(c){ return cellChecks.indexOf(c)>=0; })[0];
+    if(priorityColor) cell.classList.add('check-'+priorityColor);
     cell.textContent = i+1;
     cell.title = qq.period+' 問'+qq.num;
     cell.addEventListener('click', function(){ qPos = i; renderQuestion(); showView('quiz'); });
