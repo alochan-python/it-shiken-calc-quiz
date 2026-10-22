@@ -997,10 +997,10 @@ function renderQuestion(){
 
 function autoTimeoutAnswer(cur){
   if(answeredThisQ) return;
-  state.answers[cur.id] = {picked: null, correct: false, ts: Date.now(), timeout: true};
-  answeredInSession.add(cur.id);
-  saveState();
-  revealAnswer(cur, true);
+  // timed-out (no answer given) is shown as a miss but is intentionally NOT
+  // persisted to state.answers, so it never counts toward 不正解/間違えた問題
+  var transient = {picked: null, correct: false, ts: Date.now(), timeout: true};
+  revealAnswer(cur, true, transient);
 }
 
 function buildChoices(cur){
@@ -1068,9 +1068,9 @@ function commitAnswer(){
   revealAnswer(cur, true);
 }
 
-function revealAnswer(cur, animate){
+function revealAnswer(cur, animate, transientSaved){
   answeredThisQ = true;
-  var saved = state.answers[cur.id];
+  var saved = transientSaved || state.answers[cur.id];
   var picked = saved.picked;
   var correct = saved.correct;
 
@@ -1139,6 +1139,13 @@ function revealAnswer(cur, animate){
     window.setTimeout(function(){
       try{ panel.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest'}); }catch(e){}
     }, 30);
+    // a timeout means the user wasn't engaged, so keep the hands-free flow
+    // going on its own instead of waiting for a tap on "次へ"
+    if(saved.timeout){
+      startAutoBar(autoSeconds, '⏱ 無回答のため自動で次へ進みます', true, function(){
+        advanceNext();
+      });
+    }
   }
 }
 
